@@ -4,11 +4,15 @@ Extracted from cells 3-5 in all behavioral task notebooks.
 Extended to support LiteLLM.
 """
 
+# import os
 import os
-import anthropic
+# import anthropic
 import openai
 import backoff
-from together import Together
+# from together import Together
+
+
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 
@@ -24,44 +28,44 @@ def initialize_clients():
     """
     clients = {}
 
-    # Try Anthropic
-    try:
-        api_key = os.environ.get('ANTHROPIC_API_KEY')
-        if api_key:
-            clients['anthropic'] = anthropic.Anthropic(api_key=api_key)
-            print("✓ Anthropic client initialized")
-    except Exception as e:
-        print(f"✗ Failed to initialize Anthropic client: {e}")
+    # # Try Anthropic
+    # try:
+    #     api_key = os.environ.get('ANTHROPIC_API_KEY')
+    #     if api_key:
+    #         clients['anthropic'] = anthropic.Anthropic(api_key=api_key)
+    #         print("✓ Anthropic client initialized")
+    # except Exception as e:
+    #     print(f"✗ Failed to initialize Anthropic client: {e}")
 
-    # Try OpenAI
-    try:
-        api_key = os.environ.get('OPENAI_API_KEY')
-        if api_key:
-            clients['openai'] = openai.OpenAI(api_key=api_key)
-            print("✓ OpenAI client initialized")
-    except Exception as e:
-        print(f"✗ Failed to initialize OpenAI client: {e}")
+    # # Try OpenAI
+    # try:
+    #     api_key = os.environ.get('OPENAI_API_KEY')
+    #     if api_key:
+    #         clients['openai'] = openai.OpenAI(api_key=api_key)
+    #         print("✓ OpenAI client initialized")
+    # except Exception as e:
+    #     print(f"✗ Failed to initialize OpenAI client: {e}")
 
-    # Try Together AI
-    try:
-        api_key = os.environ.get('TOGETHER_API_KEY')
-        if api_key:
-            clients['together'] = Together(api_key=api_key)
-            print("✓ Together AI client initialized")
-    except Exception as e:
-        print(f"✗ Failed to initialize Together AI client: {e}")
+    # # Try Together AI
+    # try:
+    #     api_key = os.environ.get('TOGETHER_API_KEY')
+    #     if api_key:
+    #         clients['together'] = Together(api_key=api_key)
+    #         print("✓ Together AI client initialized")
+    # except Exception as e:
+    #     print(f"✗ Failed to initialize Together AI client: {e}")
 
-    # Try OpenRouter
-    try:
-        api_key = os.environ.get('OPENROUTER_API_KEY')
-        if api_key:
-            clients['openrouter'] = openai.OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
-            print("✓ OpenRouter client initialized")
-    except Exception as e:
-        print(f"✗ Failed to initialize OpenRouter client: {e}")
+    # # Try OpenRouter
+    # try:
+    #     api_key = os.environ.get('OPENROUTER_API_KEY')
+    #     if api_key:
+    #         clients['openrouter'] = openai.OpenAI(
+    #             base_url="https://openrouter.ai/api/v1",
+    #             api_key=api_key
+    #         )
+    #         print("✓ OpenRouter client initialized")
+    # except Exception as e:
+    #     print(f"✗ Failed to initialize OpenRouter client: {e}")
 
     # Try LiteLLM (OpenAI-compatible interface)
     try:
@@ -80,7 +84,7 @@ def initialize_clients():
 
 
 @backoff.on_exception(backoff.expo, Exception, max_tries=3)
-def call_anthropic_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32):
+def call_anthropic_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32, **kwargs):
     """
     Call Anthropic API with retry logic.
     Source: Cell 4 in all notebooks
@@ -102,7 +106,7 @@ def call_anthropic_api(client, system_prompt, user_prompt, model_name, temperatu
 
 
 @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=3)
-def call_openai_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32):
+def call_openai_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32, **kwargs):
     """
     Call OpenAI API with retry logic.
     Source: Cell 4 in all notebooks
@@ -122,7 +126,7 @@ def call_openai_api(client, system_prompt, user_prompt, model_name, temperature=
 
 
 @backoff.on_exception(backoff.expo, Exception, max_tries=3)
-def call_together_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32):
+def call_together_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32, **kwargs):
     """
     Call Together AI API with retry logic.
     Source: Cell 4 in all notebooks
@@ -142,7 +146,7 @@ def call_together_api(client, system_prompt, user_prompt, model_name, temperatur
 
 
 @backoff.on_exception(backoff.expo, Exception, max_tries=3)
-def call_openrouter_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32):
+def call_openrouter_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32, **kwargs):
     """
     Call OpenRouter API with retry logic.
     Source: Cell 4 in all notebooks
@@ -166,7 +170,7 @@ def call_openrouter_api(client, system_prompt, user_prompt, model_name, temperat
 
 
 @backoff.on_exception(backoff.expo, (openai.RateLimitError, openai.APIError), max_tries=3)
-def call_litellm_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32):
+def call_litellm_api(client, system_prompt, user_prompt, model_name, temperature=0.7, max_tokens=32, **kwargs):
     """
     Call LiteLLM API (OpenAI-compatible) with retry logic.
     Added: LiteLLM support for vLLM and other providers
